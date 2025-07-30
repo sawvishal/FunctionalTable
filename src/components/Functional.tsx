@@ -18,9 +18,7 @@ const FunctionalTable = () => {
   const [data, setData] = useState<Artwork[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
-  const [selectedArtworks, setSelectedArtworks] = useState<Artwork[] | null>(
-    null
-  );
+  const [selectedArtworks, setSelectedArtworks] = useState<Artwork[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [totalRecords, setTotalRecords] = useState(0);
   const op = useRef<OverlayPanel>(null);
@@ -53,9 +51,15 @@ const FunctionalTable = () => {
     fetchFirst10Pages();
   }, []);
 
+  // Function to handle selection change
+  const onSelectionChange = (e: { value: Artwork[] }) => {
+    setSelectedArtworks(e.value);
+  };
+
   return (
     <div className="p-4 bg-white shadow-lg rounded-lg max-w-6xl mx-auto">
       <DataTable
+        selectionMode="multiple"
         value={data}
         paginator
         rows={rowsPerPage}
@@ -67,7 +71,7 @@ const FunctionalTable = () => {
         scrollable
         showGridlines
         selection={selectedArtworks}
-        onSelectionChange={(e) => setSelectedArtworks(e.value as Artwork[])}
+        onSelectionChange={onSelectionChange}
         dataKey="id"
       >
         <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} />
@@ -75,7 +79,6 @@ const FunctionalTable = () => {
           field="title"
           header={
             <div className="flex items-center gap-x-4">
-              {/* Dropdown icon and OverlayPanel on the left */}
               <i
                 className="pi pi-chevron-down text-sm text-gray-600 cursor-pointer"
                 onClick={(e) => {
