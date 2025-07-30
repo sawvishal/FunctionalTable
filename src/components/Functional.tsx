@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import "primeicons/primeicons.css";
 import { OverlayPanel } from "primereact/overlaypanel";
+import "primeicons/primeicons.css";
 
 interface Artwork {
   id: number;
@@ -16,45 +16,47 @@ interface Artwork {
 
 const FunctionalTable = () => {
   const [data, setData] = useState<Artwork[]>([]);
-  const [totalRecords, setTotalRecords] = useState(0);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
   const [selectedArtworks, setSelectedArtworks] = useState<Artwork[] | null>(
     null
   );
-
   const [inputValue, setInputValue] = useState("");
-  const [highlightCount, setHighlightCount] = useState<number>(0);
-
+  const [totalRecords, setTotalRecords] = useState(0);
   const op = useRef<OverlayPanel>(null);
 
   const rowsPerPage = 10;
 
-  const fetchArtworks = async (pageNumber: number) => {
+  const fetchFirst10Pages = async () => {
     setLoading(true);
     try {
-      const res = await fetch(
-        `https://api.artic.edu/api/v1/artworks?page=${pageNumber + 1}`
-      );
-      const result = await res.json();
-      setData(result.data);
-      setTotalRecords(result.pagination.total);
-    } catch (error) {
-      console.error("Failed to fetch artworks:", error);
+      const collected: Artwork[] = [];
+
+      for (let i = 1; i <= 10; i++) {
+        const res = await fetch(
+          `https://api.artic.edu/api/v1/artworks?page=${i}&limit=${rowsPerPage}`
+        );
+        const result = await res.json();
+        collected.push(...(result.data as Artwork[]));
+      }
+
+      setData(collected);
+      setTotalRecords(rowsPerPage * 10); // 10 pages × 10 = 100
+    } catch (err) {
+      console.error("Failed to fetch first 10 pages", err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchArtworks(page);
-  }, [page]);
+    fetchFirst10Pages();
+  }, []);
 
   return (
     <div className="p-4 bg-white shadow-lg rounded-lg max-w-6xl mx-auto">
       <DataTable
         value={data}
-        lazy
         paginator
         rows={rowsPerPage}
         totalRecords={totalRecords}
@@ -73,8 +75,7 @@ const FunctionalTable = () => {
           field="title"
           header={
             <div className="flex items-center gap-x-4">
-              <span>Title</span>
-
+              {/* Dropdown icon and OverlayPanel on the left */}
               <i
                 className="pi pi-chevron-down text-sm text-gray-600 cursor-pointer"
                 onClick={(e) => {
@@ -82,14 +83,13 @@ const FunctionalTable = () => {
                   op.current?.toggle(e);
                 }}
               />
-
               <OverlayPanel ref={op}>
                 <div className="bg-white w-64 p-4 shadow rounded">
                   <input
                     type="number"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
-                    placeholder="Enter number of rows to select"
+                    placeholder="Enter number of rows.."
                     className="p-2 border border-gray-300 rounded w-full mb-3"
                   />
                   <button
@@ -98,7 +98,6 @@ const FunctionalTable = () => {
                       if (!isNaN(number) && number > 0) {
                         const selected = data.slice(0, number);
                         setSelectedArtworks(selected);
-                        setHighlightCount(number);
                         op.current?.hide();
                       }
                     }}
@@ -108,6 +107,7 @@ const FunctionalTable = () => {
                   </button>
                 </div>
               </OverlayPanel>
+              <span>Title</span>
             </div>
           }
         />
