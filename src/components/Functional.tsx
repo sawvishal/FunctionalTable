@@ -4,6 +4,10 @@ import { Column } from "primereact/column";
 import { OverlayPanel } from "primereact/overlaypanel";
 import "primeicons/primeicons.css";
 
+import "primereact/resources/themes/lara-light-blue/theme.css";
+import "primereact/resources/primereact.min.css";
+import "primeicons/primeicons.css";
+
 interface Artwork {
   id: number;
   title: string;
