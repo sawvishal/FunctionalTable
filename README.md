@@ -1,69 +1,61 @@
-# React + TypeScript + Vite
+# 📊 FunctionalTable
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React + PrimeReact component that renders a paginated, multi-selectable table of artwork data from the Art Institute of Chicago API. This project emphasizes pagination, persistent row selection across pages, and memory efficiency by avoiding large dataset storage in memory.
 
-Currently, two official plugins are available:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+ Tech Stack
 
-## Expanding the ESLint configuration
+* **React** 
+* **TypeScript**
+* **PrimeReact** (DataTable, OverlayPanel, Icons)
+* **Art Institute of Chicago API**
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🚀 Features
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+✅ **Server-side pagination** — Fetches 10 records per page only when needed.
+✅ **Fixed dataset scope** — Fetches a maximum of 100 records across 10 pages.
+✅ **Persistent row selection** — Selected rows stay selected even when navigating pages.
+✅ **Select all functionality** — Header checkbox selects all records across all pages.
+✅ **Dynamic row selection** — Select a specific number of rows using a custom input panel.
+✅ **Memory efficiency** — Only keeps current page data in memory.
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+---
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 🧩 Functional Breakdown
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 1. Pagination
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+* Uses `rowsPerPage = 10` and `maxPages = 10`.
+* On every page change, it fetches 10 rows using:
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+  `https://api.artic.edu/api/v1/artworks?page=${page + 1}&limit=10`
+* Ensures no pre-fetching of all records, improving load speed.
+
+### 2. Row Selection
+
+* Each row includes a checkbox for selection.
+* Selections persist across page navigation using a global state object (`globalSelected`) keyed by record `id`.
+
+#### Row Selection Features:
+
+* **Select all**: Selects all 100 rows across 10 pages.
+* **Input-based selection**: User inputs a number (e.g., 25) to select that many rows starting from page 1.
+* **Deselect all**: Clears all selected rows.
+
+### 3. Memory Safety
+
+* Only keeps **current page data** (`data`) in state.
+* Avoids storing previously fetched pages to reduce memory footprint.
+* Efficient even when user selects many rows.
+
+### 4. Custom OverlayPanel
+
+* Clicking on the title header opens an input popup.
+* Allows user to enter how many rows to select (e.g., 20).
+* Fetches required number of rows from API and selects them dynamically.
+
+### 5. Header Checkbox Functionality
+
+* Header checkbox (in selection column) is used to select or deselect all 100 records.
+* When selecting all, it programmatically fetches data from all 10 pages and updates the global selection.
+
